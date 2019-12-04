@@ -16,10 +16,10 @@ public class GameOfLife {
 		GameView view = new GameView(10,10);
 		GameController controller = new GameController(model, view, mainFrame);
 		
+		mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		mainFrame.setContentPane(view);
 		mainFrame.pack();
 		mainFrame.setVisible(true);
-		mainFrame.setSize(730,700);
 		//mainFrame.setResizable(false);
 	}
 

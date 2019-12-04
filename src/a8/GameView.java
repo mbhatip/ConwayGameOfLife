@@ -10,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,7 +29,6 @@ import javax.swing.JToggleButton;
 
 public class GameView extends JPanel implements ActionListener, PanelListener {
 	
-	private JPanel[][] _panels;
 	private List<GameViewListener> _listeners;
 	
 	
@@ -44,10 +43,8 @@ public class GameView extends JPanel implements ActionListener, PanelListener {
 	private gridPanel _gridPanel;
 	
 	public GameView(Integer width, Integer height) {
-		
 		_width = width;
 		_height = height;
-		_panels = new JPanel[width][height];
 		_listeners = new ArrayList<GameViewListener>();
 		
 		setLayout(new BorderLayout());
@@ -125,7 +122,7 @@ public class GameView extends JPanel implements ActionListener, PanelListener {
 		}
 		
 		_gridPanel.addListener(this);
-		
+
 		this.setFocusable(true);
 		this.grabFocus();
 		
@@ -185,25 +182,26 @@ public class GameView extends JPanel implements ActionListener, PanelListener {
 class gridPanel extends JPanel implements MouseListener {
 	private int _width;
 	private int _height;
-	private int _rectW;
-	private int _rectH;
+	private double _rectW;
+	private double _rectH;
 	private Rectangle[][] _rect;
 	List<Rectangle> _rectToFill;
 	List<PanelListener> _listeners;
 	
 	public gridPanel(int w, int h) {
-		setSize(700,600);
+		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		setSize(d.width,d.height-120);
 		_width = w;
 		_height = h;
 		_rect = new Rectangle[_width][_height];
 		_rectToFill = new ArrayList<Rectangle>();
 		
-		_rectW = getWidth() / _width;
-		_rectH = getHeight() / _height;
+		_rectW = (double)getWidth() / _width;
+		_rectH = (double)getHeight() / _height;
 		
 		for (int x = 0; x < _width; x++) {
 			for (int y = 0; y < _height; y++) {
-				_rect[x][y] = new Rectangle(x * _rectW, y * _rectH, _rectW, _rectH);
+				_rect[x][y] = new Rectangle((int)(x*_rectW), (int) (y*_rectH), (int) Math.round(_rectW), (int) Math.round(_rectH));
 			}
 		}
 		
@@ -226,6 +224,7 @@ class gridPanel extends JPanel implements MouseListener {
 					g2d.setColor(Color.yellow);
 				}
 				g2d.fill(_rect[x][y]);
+				
 				g2d.setColor(Color.black);
 				g2d.draw(_rect[x][y]);
 			}
