@@ -1,15 +1,18 @@
 package game;
 
+import java.awt.Point;
+
 public class Spot {
 	boolean _state;
-	int _x;
-	int _y;
-	
+	Point _p;
 	
 	public Spot(int x, int y) {
 		_state = false;
-		_x = x;
-		_y = y;
+		_p = new Point(x,y);
+	}
+	
+	public Spot(Point p) {
+		this((int) p.getX(), (int) p.getY());
 	}
 	
 	public boolean getState() {
@@ -25,10 +28,14 @@ public class Spot {
 	}
 	
 	public int getX() {
-		return _x;
+		return (int) _p.getX();
 	}
 	
 	public int getY() {
-		return _y;
+		return (int) _p.getY();
+	}
+	
+	public Point getPoint() {
+		return _p;
 	}
 }

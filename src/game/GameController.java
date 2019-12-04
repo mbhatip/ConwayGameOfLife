@@ -125,7 +125,7 @@ public class GameController implements GameViewListener, GameObserver {
 		_model = new GameModel(newX,newY);
 		_view = new GameView(newX,newY);
 		_model.setThresholds(lowB, highB, lowD, highD);
-		_view.setThresholds(lowB, highB, lowD, highD);
+		_view.setTextFields(lowB, highB, lowD, highD);
 		_model.setTorus(false);
 		_toggle = false;
 		
@@ -135,6 +135,7 @@ public class GameController implements GameViewListener, GameObserver {
 		_main.setContentPane(_view);
 		_main.pack();
 		_main.setVisible(true);
+		_main.setSize(700,700);
 	}
 
 

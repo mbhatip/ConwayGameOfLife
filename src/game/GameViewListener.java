@@ -1,5 +1,4 @@
 package game;
-import java.awt.event.MouseEvent;
 
 public interface GameViewListener {
 	void handleGameViewEvent(String command);

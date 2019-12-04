@@ -5,7 +5,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -22,7 +26,8 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 
-public class GameView extends JPanel implements ActionListener, MouseListener{
+
+public class GameView extends JPanel implements ActionListener, PanelListener {
 	
 	private JPanel[][] _panels;
 	private List<GameViewListener> _listeners;
@@ -36,35 +41,20 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 	private JTextField _highBirth;
 	private JTextField _lowDeath;
 	private JTextField _highDeath;
-	
-	private JPanel _gridPanel;
+	private gridPanel _gridPanel;
 	
 	public GameView(Integer width, Integer height) {
 		
 		_width = width;
 		_height = height;
-		
 		_panels = new JPanel[width][height];
 		_listeners = new ArrayList<GameViewListener>();
 		
 		setLayout(new BorderLayout());
 		
-		_gridPanel = new JPanel();
-		_gridPanel.setLayout(new GridLayout(height, width));
-		
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				_panels[x][y] = new JPanel();
-				_gridPanel.add(_panels[x][y]);
-				
-				emptySpot(x,y);
-				_panels[x][y].setBorder(BorderFactory.createLineBorder(Color.black));
-				_panels[x][y].setPreferredSize(new Dimension(500/width,500/height));;
-			}
-		}
+		_gridPanel = new gridPanel(_width, _height);
 		add(_gridPanel, BorderLayout.CENTER);
-		
-		
+				
 		
 		JPanel subpanel = new JPanel();
 		subpanel.setLayout(new BorderLayout());
@@ -84,19 +74,19 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 		_newY = new JTextField(3);
 		_newY.setText(height.toString());
 		
-		_lowBirth = new JTextField(3);
+		_lowBirth = new JTextField();
 		//_lowBirth.setText("3");
 		
-		_highBirth = new JTextField(3);
+		_highBirth = new JTextField();
 		//_highBirth.setText("3");
 		
-		_lowDeath = new JTextField(3);
+		_lowDeath = new JTextField();
 		//_lowDeath.setText("2");
 		
-		_highDeath = new JTextField(3);
+		_highDeath = new JTextField();
 		//_highDeath.setText("3");
 		
-		setThresholds(3,3,2,3);
+		setTextFields(3,3,2,3);
 		
 		customizePanel.setLayout(new GridLayout(2,6));
 		customizePanel.add(new JLabel("New X: "));
@@ -116,8 +106,8 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 
 		JPanel buttonPanel2 = new JPanel();
 		buttonPanel2.setLayout(new BorderLayout());
-		buttonPanel2.add(new JButton("Apply Changes"), BorderLayout.NORTH);
-		buttonPanel2.add(new JButton("Advance"), BorderLayout.SOUTH);
+		buttonPanel2.add(new JButton("Advance"), BorderLayout.NORTH);
+		buttonPanel2.add(new JButton("Apply Changes"), BorderLayout.SOUTH);
 		
 		subpanel.add(buttonPanel2, BorderLayout.EAST);
 		add(subpanel, BorderLayout.SOUTH);
@@ -134,27 +124,23 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 			b.addActionListener(this);
 		}
 		
+		_gridPanel.addListener(this);
+		
 		this.setFocusable(true);
 		this.grabFocus();
-		
-		addMouseListener(this);
 		
 	}
 	
 	public void fillSpot(int x, int y) {
-		_panels[x][y].setBackground(Color.YELLOW);
+		_gridPanel.fillRect(x,y);
 	}
 	
 	public void emptySpot(int x, int y) {
-		_panels[x][y].setBackground(Color.GRAY);
+		_gridPanel.emptyRect(x,y);
 	}
 	
 	public void clearField() {
-		for (int x = 0; x < _panels.length; x++) {
-			for (int y = 0; y < _panels[0].length; y++) {
-				emptySpot(x,y);
-			}
-		}
+		_gridPanel.clearField();
 	}
 
 	@Override
@@ -180,23 +166,7 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 		_listeners.add(l);
 	}
 
-	
-	
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		double maxWidth = _gridPanel.getWidth();
-		double maxHeight = _gridPanel.getHeight();
-		
-		int x = (int) ((double) e.getX() * _width / maxWidth);
-		int y = (int) ((double) e.getY() * _height / maxHeight);
-		if (x >= _width || y >= _height) { return;}
-		
-		for (GameViewListener l : _listeners) {
-				l.handleGameViewMouseEvent(y, x);
-		}
-	}
-	
-	public void setThresholds( Integer lb, Integer hb,
+	public void setTextFields( Integer lb, Integer hb,
 			Integer ld, Integer hd) {
 		_lowBirth.setText(lb.toString());
 		_highBirth.setText(hb.toString());
@@ -204,6 +174,101 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 		_highDeath.setText(hd.toString());
 	}
 
+	public void updatePanel(int x, int y) {
+		for (GameViewListener l : _listeners) {
+			l.handleGameViewMouseEvent(x, y);
+		}
+	}
+}
+
+
+class gridPanel extends JPanel implements MouseListener {
+	private int _width;
+	private int _height;
+	private int _rectW;
+	private int _rectH;
+	private Rectangle[][] _rect;
+	List<Rectangle> _rectToFill;
+	List<PanelListener> _listeners;
+	
+	public gridPanel(int w, int h) {
+		setSize(700,600);
+		_width = w;
+		_height = h;
+		_rect = new Rectangle[_width][_height];
+		_rectToFill = new ArrayList<Rectangle>();
+		
+		_rectW = getWidth() / _width;
+		_rectH = getHeight() / _height;
+		
+		for (int x = 0; x < _width; x++) {
+			for (int y = 0; y < _height; y++) {
+				_rect[x][y] = new Rectangle(x * _rectW, y * _rectH, _rectW, _rectH);
+			}
+		}
+		
+		clearField();
+		_listeners = new ArrayList<PanelListener>();
+		addMouseListener(this);
+		trigger_update();
+	}
+	
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		
+		Graphics2D g2d = (Graphics2D) g.create();
+		
+		g2d.setColor(Color.gray);
+		for (int x = 0; x < _width; x++) {
+			for (int y = 0; y < _height; y++) {
+				g2d.setColor(Color.gray);
+				if(_rectToFill.contains(_rect[x][y])) {
+					g2d.setColor(Color.yellow);
+				}
+				g2d.fill(_rect[x][y]);
+				g2d.setColor(Color.black);
+				g2d.draw(_rect[x][y]);
+			}
+		}
+	}
+	
+	public void clearField() {
+		_rectToFill.clear();
+		trigger_update();
+	}
+	
+	public void fillRect(int x, int y) {
+		_rectToFill.add(_rect[x][y]);
+		trigger_update();
+	}
+	
+	public void emptyRect(int x, int y) {
+		_rectToFill.remove(_rect[x][y]);
+		trigger_update();
+	}
+	
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		Point p = new Point(e.getX(), e.getY());
+		
+		int X = -1; int Y = -1;
+		for (int x = 0; x < _width; x++) {
+			for (int y = 0; y < _height; y++) {
+				if(_rect[x][y].contains(p)) {
+					X=x; Y=y;
+				}
+			}
+		}
+		
+		for (PanelListener l : _listeners) {
+			l.updatePanel(X,Y);
+		}
+	}
+
+	public void addListener(PanelListener p) {
+		_listeners.add(p);
+	}
+	
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		// TODO Auto-generated method stub
@@ -226,6 +291,27 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private void trigger_update() {		
+		repaint();
+
+		// Not sure why, but need to schedule a call
+		// to repaint for a little bit into the future
+		// as well as the one we just did above
+		// in order to make sure that we don't end up
+		// with visual artifacts due to race conditions.
+		
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+				}
+				repaint();
+			}
+		}).start();
+
 	}
 	
 }
