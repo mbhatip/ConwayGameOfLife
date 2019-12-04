@@ -125,7 +125,7 @@ public class GameModel implements Iterable<Spot>{
 			}
 		}
 
-		if (counter < _lowDeath || counter > _highDeath) return false || spot;
+		if (counter < _lowDeath || counter > _highDeath) return spot;
 		if (spot) return false;
 		return (counter >= _lowBirth && counter <= _highBirth); 
 	}

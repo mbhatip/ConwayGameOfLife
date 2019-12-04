@@ -135,7 +135,7 @@ public class GameController implements GameViewListener, GameObserver {
 		_main.setContentPane(_view);
 		_main.pack();
 		_main.setVisible(true);
-		_main.setSize(700,700);
+		_main.setSize(730,700);
 	}
 
 

@@ -238,7 +238,10 @@ class gridPanel extends JPanel implements MouseListener {
 	}
 	
 	public void fillRect(int x, int y) {
-		_rectToFill.add(_rect[x][y]);
+		Rectangle r = _rect[x][y];
+		if (!_rectToFill.contains(r)) {
+			_rectToFill.add(r);
+		}
 		trigger_update();
 	}
 	

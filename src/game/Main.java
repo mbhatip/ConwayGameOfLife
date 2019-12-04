@@ -19,7 +19,7 @@ public class Main {
 		mainFrame.setContentPane(view);
 		mainFrame.pack();
 		mainFrame.setVisible(true);
-		mainFrame.setSize(700,700);
+		mainFrame.setSize(730,700);
 		//mainFrame.setResizable(false);
 	}
 
