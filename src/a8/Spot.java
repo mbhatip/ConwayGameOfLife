@@ -1,4 +1,4 @@
-package game;
+package a8;
 
 public class Spot {
 	boolean _state;
