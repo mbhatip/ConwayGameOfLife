@@ -1,4 +1,4 @@
-package game;
+package a8;
 
 
 import java.awt.BorderLayout;
@@ -253,7 +253,7 @@ class gridPanel extends JPanel implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		Point p = new Point(e.getX(), e.getY());
-		
+		if (!contains(p)) {return;}
 		int X = -1; int Y = -1;
 		for (int x = 0; x < _width; x++) {
 			for (int y = 0; y < _height; y++) {
@@ -262,6 +262,7 @@ class gridPanel extends JPanel implements MouseListener {
 				}
 			}
 		}
+		if (X == -1 || Y == -1) {return;}
 		
 		for (PanelListener l : _listeners) {
 			l.updatePanel(X,Y);

@@ -1,4 +1,4 @@
-package game;
+package a8;
 
 public interface GameViewListener {
 	void handleGameViewEvent(String command);
