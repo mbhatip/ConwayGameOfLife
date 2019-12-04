@@ -6,6 +6,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -58,8 +60,12 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 				_gridPanel.add(_panels[x][y]);
 				
 				emptySpot(x,y);
-				_panels[x][y].setBorder(BorderFactory.createLineBorder(Color.black));
-				_panels[x][y].setPreferredSize(new Dimension(500/width,500/height));;
+				_panels[x][y].setBorder(BorderFactory.createLineBorder(Color.black, 1));
+				Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
+				Dimension d = new Dimension((int)(s.getWidth() - 100)/_width, (int)(s.getHeight() - 100)/_height);
+				_gridPanel.setPreferredSize(s);
+				
+				//_panels[x][y].setPreferredSize(d);
 			}
 		}
 		add(_gridPanel, BorderLayout.CENTER);
@@ -184,15 +190,18 @@ public class GameView extends JPanel implements ActionListener, MouseListener{
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		double maxWidth = _gridPanel.getWidth();
-		double maxHeight = _gridPanel.getHeight();
+		Point p = new Point(e.getX(), e.getY());
+		if (!_gridPanel.contains(p)) return;
 		
-		int x = (int) ((double) e.getX() * _width / maxWidth);
-		int y = (int) ((double) e.getY() * _height / maxHeight);
-		if (x >= _width || y >= _height) { return;}
-		
-		for (GameViewListener l : _listeners) {
-				l.handleGameViewMouseEvent(y, x);
+		for (int x = 0; x < _width; x++) {
+			for (int y = 0; y < _height; y++) {
+				p = new Point(e.getX() - _panels[x][y].getX(), e.getY()- _panels[x][y].getY());
+				if (_panels[x][y].contains(p)) {
+					for (GameViewListener l : _listeners) {
+						l.handleGameViewMouseEvent(x, y);
+					}	
+				}
+			}
 		}
 	}
 	

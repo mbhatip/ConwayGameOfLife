@@ -13,10 +13,12 @@ public class GameOfLife {
 		GameModel model = new GameModel(10,10);
 		GameView view = new GameView(10,10);
 		GameController controller = new GameController(model, view, mainFrame);
-		
+		mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		mainFrame.setContentPane(view);
 		mainFrame.pack();
+		
 		mainFrame.setVisible(true);
+		
 	}
 
 }

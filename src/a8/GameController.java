@@ -132,6 +132,7 @@ public class GameController implements GameViewListener, GameObserver {
 		_model.addObserver(this);
 		_view.addGameViewListener(this);
 		
+		_main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		_main.setContentPane(_view);
 		_main.pack();
 		_main.setVisible(true);
